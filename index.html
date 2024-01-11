@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HUG 보증 가능여부 확인 (아파트 제외)</title>
+    <style>
+      body {
+        font-family: "Nanum Gothic", sans-serif;
+        text-align: left;
+        margin: 50px;
+      }
+
+      button {
+        padding: 10px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+
+      input {
+        padding: 8px;
+        font-size: 14px;
+      }
+
+      label[for="depositInput"] {
+        padding-right: 15px;
+      }
+
+      label[for="seniorDebtInput"] {
+        padding-right: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>
+      HUG 보증보험 가입 가능여부 확인
+      <span style="color: #fc9803"> (아파트 제외)</span>
+    </h1>
+    <h1>아래 정보를 입력</h1>
+    <label for="depositInput">전세보증금 (단위: 억)</label>
+    <input
+      type="text"
+      id="depositInput"
+      placeholder="전세 보증금을 입력"
+      value="3.4"
+    /><br />
+
+    <label for="seniorDebtInput">선순위채권 (단위: 억)</label>
+    <input
+      type="text"
+      id="seniorDebtInput"
+      placeholder="선순위채권 총액을 입력"
+      value="0.6"
+    /><br />
+
+    <label for="commonHousePriceInput">공동주택가격 (단위: 억)</label>
+    <input
+      type="text"
+      id="commonHousePriceInput"
+      placeholder="공동주택 가격을 입력"
+      value="2.72"
+    />
+    <button id="confirmHousePriceButton">
+      <a
+        href="https://www.realtyprice.kr/notice/town/nfSiteLink.htm"
+        id="confirmHousePriceLink"
+        target="_blank"
+        >공동주택가격 확인하기</a
+      >
+    </button>
+    <br /><br />
+
+    <button id="confirmButton">보증 가능 여부 확인</button>
+
+    <div id="resultDisplay"></div>
+    <div id="additionalInfo">
+      <h1>참고</h1>
+      <p>
+        <a
+          href="https://www.khug.or.kr/hug/web/ig/dr/igdr000001.jsp"
+          target="_blank"
+        >
+          HUG보증보험 상품정보 및 주택가액 산정방법</a
+        >
+      </p>
+    </div>
+    <script>
+      // Vanilla JavaScript를 사용하여 버튼 클릭 처리
+      document
+        .getElementById("confirmButton")
+        .addEventListener("click", function () {
+          var deposit = document.getElementById("depositInput").value.trim();
+          var seniorDebt = document
+            .getElementById("seniorDebtInput")
+            .value.trim();
+          var commonHousePrice = document
+            .getElementById("commonHousePriceInput")
+            .value.trim();
+
+          // 입력 값이 비어있는지 체크
+          if (!deposit || !seniorDebt || !commonHousePrice) {
+            alert("모든 입력값을 채워주세요.");
+            return;
+          }
+
+          // 숫자로 변환
+          deposit = parseFloat(deposit);
+          seniorDebt = parseFloat(seniorDebt);
+          commonHousePrice = parseFloat(commonHousePrice);
+
+          // 각 입력값 체크
+          if (deposit <= 0) {
+            alert("전세보증금은 0 보다 커야 합니다.");
+            return;
+          }
+          if (seniorDebt < 0) {
+            alert("선순위채권 값은 0 이상 이어야 합니다.");
+            return;
+          }
+          if (commonHousePrice <= 0) {
+            alert("공동주택가격은 0 보다 커야 합니다.");
+            return;
+          }
+
+          // 주택가액 = 공동주택가격 * 1.26 이며 아래 3개의 조건을 만족해야 한다.
+          // 1. (보증금 + 선순위채권총액) <= 주택가액
+          // 2. 선순위채권총액 <= 주택가액 * 0.6
+          // 3. 보증금 <= 보증한도 (7억)
+
+          // 위 조건 확인
+          var housePrice = (commonHousePrice * 1.26).toFixed(4);
+          var condition1 = deposit + seniorDebt <= housePrice;
+          var condition2 = seniorDebt <= housePrice * 0.6;
+          var condition3 = deposit <= 7;
+
+          // 계산의 결과를 보여준다.
+          var resultDisplay = document.getElementById("resultDisplay");
+          resultDisplay.innerHTML =
+            "<h1>최소 아래 3가지 조건을 만족 해야함</h1>" +
+            "조건 1. (전세보증금 + 선순위채권총액) <= 주택가액<br>" +
+            "조건 2. 선순위채권총액 <= 주택가액 * 0.6<br>" +
+            "조건 3. 보증금 <= 보증한도 (7억)<br><br>";
+
+          // 보증 가능 여부를 보여준다.
+          resultDisplay.innerHTML +=
+            "<strong>조건 1 만족 여부: " +
+            (condition1 ? "O" : "X") +
+            "</strong><br>";
+          resultDisplay.innerHTML +=
+            "<strong>조건 2 만족 여부: " +
+            (condition2 ? "O" : "X") +
+            "</strong><br>";
+          resultDisplay.innerHTML +=
+            "<strong>조건 3 만족 여부: " +
+            (condition3 ? "O" : "X") +
+            "</strong><br><br>";
+
+          if (condition1 && condition2 && condition3) {
+            resultDisplay.innerHTML +=
+              "<span style='color: green; font-weight: bold;'>예상결과: HUG보증 가능!</span>";
+          } else {
+            resultDisplay.innerHTML +=
+              "<span style='color: red; font-weight: bold;'>예상결과: HUG보증 불가!</span>";
+          }
+        });
+    </script>
+  </body>
+</html>
