@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://jeonse-eligibility.netlify.app/sitemap.xml
+
